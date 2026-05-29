@@ -1,9 +1,8 @@
 """llama.cpp model wrapper.
 
-``LlamaModel`` is a thin, faithful port of the llama.cpp C calls used by
-``inf.zig/src/exe_tcpip_generation.zig`` (via ``wrapper_llama.zig``). It uses
-the low-level ``llama_cpp`` ctypes bindings shipped with ``llama-cpp-python`` so
-each method maps almost 1:1 onto the original Zig call.
+``LlamaModel`` is a thin wrapper over the llama.cpp C calls needed for
+inference. It uses the low-level ``llama_cpp`` ctypes bindings shipped with
+``llama-cpp-python`` so each method maps almost 1:1 onto a single C call.
 
 This module imports ``llama_cpp`` at module load, so it is imported lazily by
 the CLI (and never by the protocol/client unit tests).
@@ -16,7 +15,7 @@ import ctypes
 import llama_cpp
 import numpy as np
 
-#: Buffer size for token-piece detokenization (matches the Zig 128-byte buffer).
+#: Buffer size for token-piece detokenization.
 _PIECE_BUF_LEN = 128
 
 _backend_ready = False
@@ -25,8 +24,8 @@ _backend_ready = False
 def _ensure_backend() -> None:
     """Initialize the ggml/llama backend registry exactly once.
 
-    Equivalent to the Zig ``ggml_backend_load_all()`` + ``llama_backend_init``;
-    ``llama-cpp-python`` registers the bundled backends when this is called.
+    Calls ``llama_backend_init``; ``llama-cpp-python`` registers the bundled
+    backends when this is called.
     """
     global _backend_ready
     if not _backend_ready:
@@ -73,7 +72,7 @@ class LlamaModel:
     def tokenize(
         self, text: str, add_special: bool = True, parse_special: bool = True
     ) -> list[int]:
-        """Tokenize ``text`` using the two-call sizing pattern from the Zig code."""
+        """Tokenize ``text`` using llama.cpp's two-call sizing pattern."""
         data = text.encode("utf-8")
         # First call with a null buffer returns the negated token count.
         n = -llama_cpp.llama_tokenize(
@@ -138,7 +137,7 @@ class LlamaModel:
     # -- inference context ----------------------------------------------------
 
     def make_context(self, n_prompt: int, n_predict: int) -> None:
-        """Create the inference context, sizing it as the Zig client does."""
+        """Create the inference context, sized for the prompt plus prediction."""
         ctx_params = llama_cpp.llama_context_default_params()
         ctx_params.n_ctx = n_prompt + n_predict - 1
         ctx_params.n_batch = n_prompt
@@ -162,8 +161,8 @@ class LlamaModel:
         """Return the logits for the last decoded position as ``n_vocab`` f32s.
 
         Uses ``llama_get_logits_ith(ctx, -1)`` -- the last position -- which is
-        the correct row for autoregressive generation (the Zig client read row
-        0, which only works for single-token batches).
+        the correct row for autoregressive generation (reading row 0 only works
+        for single-token batches).
         """
         if self.ctx is None:
             raise RuntimeError("get_last_logits() called before make_context()")

@@ -1,7 +1,7 @@
 [project]
 name = "stateful-sampler-inference"
 version = "0.1.0"
-description = "Python recreation of inf.zig's tcpip_gen: llama.cpp inference with remote logit sampling over TCP."
+description = "tcpip_gen: llama.cpp inference with remote logit sampling over TCP."
 readme = "README.md"
 requires-python = ">=3.11.12"
 dependencies = [

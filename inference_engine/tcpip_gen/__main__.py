@@ -1,9 +1,9 @@
 """CLI entrypoint: ``python -m tcpip_gen <model.gguf> "<prompt>"``.
 
-Mirrors ``inf.zig/src/exe_tcpip_generation.zig``'s ``main()``, with one
-deliberate correction: it calls ``llama_decode`` at the top of each generation
-step (as ``exe_completion.zig`` does) so the logits sent to the sampler reflect
-a real forward pass. The wire protocol matches the running Rust sampler.
+Implements the TCP/IP generation entry point for the Rust sampler wire protocol.
+
+Each generation step runs `llama_decode` before sampling so the logits sent to
+the sampler reflect a real forward pass.
 
 Diagnostics go to stderr; generated text streams to stdout as raw bytes so
 multi-byte UTF-8 tokens render correctly.
@@ -33,7 +33,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="tcpip_gen",
         description=(
             "llama.cpp text generation with sampling delegated to a remote "
-            "sampler over TCP (Python port of inf.zig's tcpip_gen)."
+            "sampler over TCP"
         ),
     )
     parser.add_argument("model_path", help="path to a .gguf model")

@@ -1,15 +1,11 @@
 # stateful-sampler-inference
 
-A Python recreation of the `tcpip_gen` binary from
-[`inf.zig`](../../printers-company-inc/inf.zig)
-(`src/exe_tcpip_generation.zig`).
-
 `tcpip_gen` runs llama.cpp inference **locally** but delegates token **sampling**
-to a remote sampler over TCP. This package reimplements that client in Python:
-it loads a GGUF model with [`llama-cpp-python`](https://github.com/abetlen/llama-cpp-python),
-connects to the sampler (the Rust
-[`stateful_logit_sampler`](../../printers-company-inc/stateful_logit_sampler)
-listening on `127.0.0.1:5146`), streams raw logits each decode step, and prints
+to a remote sampler over TCP. It loads a GGUF model with
+[`llama-cpp-python`](https://github.com/abetlen/llama-cpp-python),
+connects to the Rust
+[`stateful_logit_sampler`](../stateful_sampler)
+(listening on `127.0.0.1:5146`), streams raw logits each decode step, and prints
 the tokens the sampler chooses.
 
 An optional **OpenAI-compatible HTTP server** (`python -m tcpip_gen.server`)
@@ -97,27 +93,6 @@ sampler (`sampler.rs`).
 | Handshake | `b"HANDSHAKE"` + `i32(n_vocab)` + `(piece + b"\x00") * n_vocab` + `b"\x00"` | `i32(n_vocab)` (4 bytes)   |
 | Per token | `b"LOGITS"` + `n_vocab × f32`                                           | `i32(count)` + `i32(token)` (8 bytes) |
 | End       | `b"\x00"` on EOG, then close socket                                     | (read == 0 ⇒ "Completed")  |
-
-### Two deliberate deviations from the Zig source
-
-1. **Adds `llama_decode`.** The Zig `tcpip_gen` loop never calls `llama_decode`,
-   so its logits are stale/uninitialized (a bug). This port decodes at the top
-   of each step — like `exe_completion.zig` — and reads the **last** position's
-   logits via `llama_get_logits_ith(ctx, -1)`, so generation actually works.
-2. **8-byte logits reply.** The Rust server replies with `i32(count) + i32(token)`
-   = 8 bytes. The Zig client mistakenly reads the count as a 64-bit `usize`
-   (12 bytes total). This port follows the **running server**, which is required
-   to interoperate.
-
-### Handshake quirk (faithfully reproduced)
-
-The Zig client writes `piece + \x00` per token, then one **extra** trailing
-`\x00`. The server's parser turns the resulting double-null into a stray `"NUL"`
-token *unless exactly one token has an empty piece*. So the handshake's token
-count only balances for vocabularies with exactly one empty-piece token. This is
-a property of the original system; the Python port replicates the sender
-byte-for-byte rather than working around it. (Llama-3.1 and Qwen3 vocabs happen
-to satisfy this.)
 
 ## Setup
 

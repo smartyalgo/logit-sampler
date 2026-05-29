@@ -97,10 +97,6 @@ All integers and floats are **little-endian**.
 | Per token | `"LOGITS"` + `n_vocab × f32`                                            | `i32(count)` + `i32(token)` (8 bytes)  |
 | End       | socket close on end-of-generation                                      | (read == 0 ⇒ "Completed")              |
 
-The authoritative description of each field (and the deliberate deviations from
-the original Zig client) lives in
-[`inference_engine/README.md`](inference_engine/README.md#wire-protocol).
-
 ## Quick start
 
 The sampler must be running **before** the engine connects.

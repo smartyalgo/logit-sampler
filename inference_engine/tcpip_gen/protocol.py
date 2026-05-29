@@ -1,9 +1,7 @@
 """Wire-protocol framing for the remote logit sampler.
 
-These helpers are a 1:1 port of the byte layout produced/consumed by the Zig
-``tcpip_gen`` client (``inf.zig/src/exe_tcpip_generation.zig``) and the Rust
-sampler (``stateful_logit_sampler/.../src/sampler.rs``). Everything is
-little-endian.
+These helpers produce/consume the exact byte layout expected by the Rust
+sampler (``stateful_sampler/src/sampler.rs``). Everything is little-endian.
 
 The functions here are intentionally free of any socket or ``llama_cpp``
 dependency so they can be unit-tested without a model or a live server.
@@ -18,10 +16,9 @@ Protocol summary (all integers/floats little-endian)::
 
 Note on the trailing ``b"\\x00"``: the server detects the end of the vocab
 stream by looking for two consecutive null bytes, and its parser emits one
-extra ``"NUL"`` token for the first empty piece it sees. Replicating the Zig
-sender byte-for-byte means the handshake only balances when exactly one vocab
-entry has an empty piece -- this is a property of the original system, not a
-bug we introduce here.
+extra ``"NUL"`` token for the first empty piece it sees. As a result the
+handshake token count only balances when exactly one vocab entry has an empty
+piece -- a property of the wire protocol the sender must respect.
 """
 
 from __future__ import annotations
@@ -50,12 +47,12 @@ LOGITS_RESPONSE_LEN = 8
 def build_handshake(n_vocab: int, pieces: Sequence[bytes]) -> bytes:
     """Serialize the handshake message.
 
-    Mirrors the Zig writer: the magic string, an ``i32`` token count, every
-    token piece followed by a null byte, and finally one extra null byte.
+    Layout: the magic string, an ``i32`` token count, every token piece
+    followed by a null byte, and finally one extra null byte.
 
     Args:
         n_vocab: Vocabulary size advertised in the header. Must equal
-            ``len(pieces)`` (the Zig client always sends every token).
+            ``len(pieces)`` (every token is always sent).
         pieces: Per-token piece bytes, as returned by ``llama_token_to_piece``
             with ``special=True``.
 
@@ -90,9 +87,7 @@ def build_logits_message(logits: Sequence[float] | np.ndarray) -> bytes:
 def parse_logits_response(data: bytes) -> tuple[int, int]:
     """Parse the server's per-step reply into ``(count, token_id)``.
 
-    The Rust sampler replies with ``i32(count) + i32(token)`` (8 bytes). This
-    deliberately follows the running server rather than the Zig client, which
-    mistakenly reads the count as a 64-bit ``usize``.
+    The Rust sampler replies with ``i32(count) + i32(token)`` (8 bytes).
     """
     if len(data) != LOGITS_RESPONSE_LEN:
         raise ValueError(

@@ -1,5 +1,4 @@
-"""Python recreation of the ``inf.zig`` ``tcpip_gen`` binary.
-
+"""
 ``tcpip_gen`` runs llama.cpp inference locally but delegates token *sampling* to
 a remote sampler over TCP. This package mirrors that client:
 

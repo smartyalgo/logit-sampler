@@ -5,8 +5,8 @@ real handshake with a tiny synthetic vocab -- no model is loaded.
 
 The vocab is crafted so the server's parser yields exactly ``n_vocab`` tokens:
 the server emits one extra ``"NUL"`` token for the first empty piece, and the
-Zig-style trailing null otherwise adds a stray token. Including exactly one
-empty piece balances that quirk (see :mod:`tcpip_gen.protocol`).
+trailing null otherwise adds a stray token. Including exactly one empty piece
+balances that quirk (see :mod:`tcpip_gen.protocol`).
 """
 
 import socket

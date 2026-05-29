@@ -97,8 +97,8 @@ class SamplerClient:
     def finish(self) -> None:
         """Signal end-of-generation to the server (a single null byte).
 
-        Mirrors the Zig client, which writes ``\\x00`` when it hits an EOG
-        token. The server also treats a closed socket as completion.
+        Writes ``\\x00`` on reaching an EOG token. The server also treats a
+        closed socket as completion.
         """
         self._send(b"\x00")
 
