@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      # Tests need numpy + the FastAPI stack, but NOT llama-cpp-python: the model
+      # wrapper is type-only at import time, so the protocol/client/engine/server
+      # tests run in an ephemeral env (--no-project) without building the native
+      # wheel. LlamaModel is covered by the manual e2e run.
+      - name: Ruff format check
+        run: uv run --no-project --with ruff ruff format --check .
+
+      - name: Ruff lint
+        run: uv run --no-project --with ruff ruff check .
+
+      - name: Pytest
+        run: >-
+          uv run --no-project
+          --with pytest --with numpy --with fastapi --with sse-starlette --with httpx
+          pytest -v

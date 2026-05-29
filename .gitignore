@@ -1,0 +1,36 @@
+# Top-level ignores for the monorepo.
+# Each subproject (inference_engine/, stateful_sampler/) keeps its own
+# .gitignore for language-specific artifacts; this file covers OS/editor
+# cruft and anything that shouldn't land at the repo root.
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editors / IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Rust build output (also ignored in stateful_sampler/.gitignore)
+target/
+
+# Python artifacts (also ignored in inference_engine/.gitignore)
+__pycache__/
+*.py[oc]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Model weights — never commit GGUF files anywhere in the tree
+*.gguf
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs
+*.log
