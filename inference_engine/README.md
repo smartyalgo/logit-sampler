@@ -103,6 +103,13 @@ uv sync                 # creates .venv and installs deps (incl. llama-cpp-pytho
 source .venv/bin/activate   # optional; or prefix commands with `uv run`
 ```
 
+Or run the whole stack (sampler + server + Open WebUI) with Docker Compose from
+the repo root — see the [top-level README](../README.md):
+
+```sh
+MODEL_FILE=<your-model>.gguf docker compose up --build
+```
+
 ## CLI usage
 
 Start the sampler first (must be listening on `127.0.0.1:5146`), then:

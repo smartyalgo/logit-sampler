@@ -97,7 +97,30 @@ All integers and floats are **little-endian**.
 | Per token | `"LOGITS"` + `n_vocab × f32`                                            | `i32(count)` + `i32(token)` (8 bytes)  |
 | End       | socket close on end-of-generation                                      | (read == 0 ⇒ "Completed")              |
 
-## Quick start
+## Quick start (Docker Compose)
+
+One command brings up the sampler, the OpenAI-compatible engine, and Open WebUI:
+
+```bash
+mkdir -p models                      # put a .gguf model file here
+MODEL_FILE=<your-model>.gguf docker compose up --build
+```
+
+| Service | Port | What it is |
+|---------|------|------------|
+| `sampler` | 5146 | Rust stateful sampler |
+| `engine` | 8000 | OpenAI-compatible API (`/v1/chat/completions`) |
+| `open-webui` | 3000 | Chat UI at <http://localhost:3000> |
+
+Environment variables (set inline or in a `.env` file): `MODEL_FILE` (GGUF file
+name inside `./models/`, default `model.gguf`), `MODEL_ID` (name shown to
+clients, default `local-llama`), `RUST_LOG` (sampler log level, default `info`).
+
+Sampling parameters (temperature, top-k/p, min-p) are set on the `sampler`
+service `command` in [`docker-compose.yml`](docker-compose.yml) — client-side
+values are ignored (see below).
+
+## Quick start (manual)
 
 The sampler must be running **before** the engine connects.
 
@@ -175,6 +198,7 @@ Both subprojects have GitHub Actions CI
 │   └── src/
 │       ├── main.rs       #   CLI args + SamplerRouter bootstrap
 │       └── sampler/      #   Sampler + logit_manipulation
+├── docker-compose.yml    # Full environment: sampler + engine + Open WebUI
 └── README.md             # (this file)
 ```
 
