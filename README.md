@@ -112,8 +112,9 @@ MODEL_FILE=<your-model>.gguf docker compose up --build
 | `engine` | 8000 | OpenAI-compatible API (`/v1/chat/completions`) |
 | `open-webui` | 3000 | Chat UI at <http://localhost:3000> |
 
-Environment variables (set inline or in a `.env` file): `MODEL_FILE` (GGUF file
-name inside `./models/`, default `model.gguf`), `MODEL_ID` (name shown to
+Environment variables (set inline or in a `.env` file): `MODELS_DIR` (host
+directory mounted as `/models`, default `./models`), `MODEL_FILE` (GGUF file
+name inside that directory, default `model.gguf`), `MODEL_ID` (name shown to
 clients, default `local-llama`), `RUST_LOG` (sampler log level, default `info`).
 
 Sampling parameters (temperature, top-k/p, min-p) are set on the `sampler`

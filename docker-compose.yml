@@ -33,7 +33,7 @@ services:
       - --max-tokens
       - "256"
     volumes:
-      - ./models:/models:ro
+      - ${MODELS_DIR:-./models}:/models:ro
     ports:
       - "8000:8000"
     # engine exits if the sampler connection drops; just reconnect
