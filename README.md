@@ -16,6 +16,7 @@ This repository is a monorepo of two cooperating components:
 |-----------|----------|------|------|
 | [`inference_engine/`](inference_engine/) | Python | Loads a GGUF model with `llama-cpp-python`, runs the decode loop, streams raw logits to the sampler, and prints the chosen tokens. Also ships an OpenAI-compatible HTTP server. | [README](inference_engine/README.md) |
 | [`stateful_sampler/`](stateful_sampler/) | Rust | TCP server that receives logits and returns a sampled token id (temperature / top-k / top-p / min-p). Listens on `:5146`. | [README](stateful_sampler/README.md) |
+| [`prompt_eval/`](prompt_eval/) | Python | Benchmark prompt "bags" (HumanEval, MBPP) for exercising the chat endpoint; a runner that stores responses is planned. | [README](prompt_eval/README.md) |
 
 The two talk over a small little-endian wire protocol: a one-time **handshake**
 (vocabulary exchange) followed by a **per-token** loop (`LOGITS` → token id).
@@ -222,6 +223,9 @@ Both subprojects have GitHub Actions CI
 │   └── src/
 │       ├── main.rs       #   CLI args + SamplerRouter bootstrap
 │       └── sampler/      #   Sampler + logit_manipulation
+├── prompt_eval/          # Python: benchmark prompt bags for the chat endpoint
+│   ├── fetch_prompts.py  #   downloads bags from Hugging Face
+│   └── bags/             #   stored prompt bags (JSON)
 ├── docker-compose.yml    # Full environment: sampler + engine + Open WebUI
 └── README.md             # (this file)
 ```

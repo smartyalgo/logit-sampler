@@ -1,0 +1,17 @@
+[project]
+name = "prompt-eval"
+version = "0.1.0"
+description = "Prompt bags and (later) a runner for the chat/completions endpoint."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.15",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
