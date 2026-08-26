@@ -20,6 +20,53 @@ This repository is a monorepo of two cooperating components:
 The two talk over a small little-endian wire protocol: a one-time **handshake**
 (vocabulary exchange) followed by a **per-token** loop (`LOGITS` → token id).
 
+## How to run (Docker Compose)
+
+One command brings up the sampler, the OpenAI-compatible engine, and Open WebUI.
+
+**1. Get a GGUF model.** The engine needs a llama.cpp-compatible `.gguf` file.
+The repo ships without one (`*.gguf` is gitignored), so copy one into
+`./models/`:
+
+```bash
+mkdir -p models
+cp /path/to/your-model.gguf models/
+```
+
+or point `MODELS_DIR` at a directory that already holds your models.
+
+**2. Start the stack:**
+
+```bash
+MODEL_FILE=your-model.gguf docker compose up --build
+
+# or with an external models directory:
+MODELS_DIR=/path/to/llm-models MODEL_FILE=your-model.gguf docker compose up --build
+```
+
+**3. Chat.** Open <http://localhost:3000> and pick the model (default name
+`local-llama`).
+
+| Service | Port | What it is |
+|---------|------|------------|
+| `sampler` | 5146 | Rust stateful sampler |
+| `engine` | 8000 | OpenAI-compatible API (`/v1/chat/completions`) |
+| `open-webui` | 3000 | Chat UI at <http://localhost:3000> |
+
+Environment variables (set inline or in a `.env` file): `MODELS_DIR` (host
+directory mounted as `/models`, default `./models`), `MODEL_FILE` (GGUF file
+name inside that directory, default `model.gguf`), `MODEL_ID` (name shown to
+clients, default `local-llama`), `RUST_LOG` (sampler log level, default `info`).
+
+Sampling parameters (temperature, top-k/p, min-p) are set on the `sampler`
+service `command` in [`docker-compose.yml`](docker-compose.yml) — client-side
+values are ignored (see below).
+
+> **Troubleshooting:** if the `engine` container restart-loops logging
+> `failed to open GGUF file '/models/model.gguf' (No such file or directory)`,
+> the mounted models directory has no matching model — check `MODELS_DIR` and
+> `MODEL_FILE` against the actual file name.
+
 ## Architecture
 
 ```mermaid
@@ -97,7 +144,7 @@ All integers and floats are **little-endian**.
 | Per token | `"LOGITS"` + `n_vocab × f32`                                            | `i32(count)` + `i32(token)` (8 bytes)  |
 | End       | socket close on end-of-generation                                      | (read == 0 ⇒ "Completed")              |
 
-## Quick start
+## Quick start (manual)
 
 The sampler must be running **before** the engine connects.
 
@@ -175,6 +222,7 @@ Both subprojects have GitHub Actions CI
 │   └── src/
 │       ├── main.rs       #   CLI args + SamplerRouter bootstrap
 │       └── sampler/      #   Sampler + logit_manipulation
+├── docker-compose.yml    # Full environment: sampler + engine + Open WebUI
 └── README.md             # (this file)
 ```
 

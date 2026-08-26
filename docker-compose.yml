@@ -1,0 +1,55 @@
+# Full environment: Rust sampler + Python inference engine + Open WebUI.
+# Put a GGUF model in ./models/ and set MODEL_FILE (or rename it to model.gguf):
+#   MODEL_FILE=qwen2.5-0.5b-instruct-q4_k_m.gguf docker compose up --build
+services:
+  sampler:
+    build: ./stateful_sampler
+    # Sampling params live here (the wire protocol only carries logits, so
+    # client-side temperature/top_p are ignored). Add flags after the address:
+    # command: ["0.0.0.0:5146", "--temperature", "0.8", "--top_k", "40"]
+    command: ["0.0.0.0:5146"]
+    environment:
+      RUST_LOG: ${RUST_LOG:-info}
+    ports:
+      - "5146:5146"
+
+  engine:
+    build: ./inference_engine
+    depends_on:
+      - sampler
+    command:
+      - --model
+      - /models/${MODEL_FILE:-model.gguf}
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --sampler-host
+      - sampler
+      - --sampler-port
+      - "5146"
+      - --model-id
+      - ${MODEL_ID:-local-llama}
+      - --max-tokens
+      - "256"
+    volumes:
+      - ${MODELS_DIR:-./models}:/models:ro
+    ports:
+      - "8000:8000"
+    # engine exits if the sampler connection drops; just reconnect
+    restart: unless-stopped
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    depends_on:
+      - engine
+    environment:
+      OPENAI_API_BASE_URL: http://engine:8000/v1
+      OPENAI_API_KEY: sk-ignored
+    ports:
+      - "3000:8080"
+    volumes:
+      - open-webui:/app/backend/data
+
+volumes:
+  open-webui:

@@ -49,6 +49,14 @@ cargo test
 cargo run 
 ```
 
+#### How to run in Docker
+```bash
+docker build -t stateful-sampler .
+docker run -p 5146:5146 stateful-sampler
+# or, from the repo root, as part of the full stack:
+docker compose up sampler
+```
+
 #### Logging
 Log verbosity is controlled by the `RUST_LOG` environment variable (parsed by
 `tracing-subscriber`'s `EnvFilter`). When `RUST_LOG` is unset, the level defaults
