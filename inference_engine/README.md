@@ -107,7 +107,7 @@ Or run the whole stack (sampler + server + Open WebUI) with Docker Compose from
 the repo root — see the [top-level README](../README.md):
 
 ```sh
-MODEL_FILE=<your-model>.gguf docker compose up --build
+docker compose up --build   # MODEL_FILE=<name>.gguf picks one of several models
 ```
 
 ## CLI usage
@@ -178,6 +178,9 @@ uv run python -m tcpip_gen.server \
     --max-tokens 256
 ```
 
+`--model` also accepts a directory that holds exactly one `.gguf` (this is
+what Docker Compose passes when `MODEL_FILE` is unset).
+
 ### Use it
 
 ```sh
@@ -194,7 +197,7 @@ r = client.chat.completions.create(
     messages=[{"role": "user", "content": "The capital of Japan is"}],
     max_tokens=16,
 )
-print(r.choices[0].message.content)   # -> "The capital of Japan is Tokyo."
+print(r.choices[0].message.content)  # -> "The capital of Japan is Tokyo."
 ```
 
 ### Sampling parameters are ignored

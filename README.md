@@ -39,6 +39,9 @@ or point `MODELS_DIR` at a directory that already holds your models.
 **2. Start the stack:**
 
 ```bash
+docker compose up --build
+
+# if the directory holds several models, pick one by file name:
 MODEL_FILE=your-model.gguf docker compose up --build
 
 # or with an external models directory:
@@ -56,7 +59,7 @@ MODELS_DIR=/path/to/llm-models MODEL_FILE=your-model.gguf docker compose up --bu
 
 Environment variables (set inline or in a `.env` file): `MODELS_DIR` (host
 directory mounted as `/models`, default `./models`), `MODEL_FILE` (GGUF file
-name inside that directory, default `model.gguf`), `MODEL_ID` (name shown to
+name inside that directory; when unset, the engine uses the only `.gguf` there), `MODEL_ID` (name shown to
 clients, default `local-llama`), `RUST_LOG` (sampler log level, default `info`).
 
 Sampling parameters (temperature, top-k/p, min-p) are set on the `sampler`
@@ -64,9 +67,9 @@ service `command` in [`docker-compose.yml`](docker-compose.yml) — client-side
 values are ignored (see below).
 
 > **Troubleshooting:** if the `engine` container restart-loops logging
-> `failed to open GGUF file '/models/model.gguf' (No such file or directory)`,
-> the mounted models directory has no matching model — check `MODELS_DIR` and
-> `MODEL_FILE` against the actual file name.
+> `--model /models/: expected exactly one .gguf, found ...`, the mounted
+> directory holds zero or several models — check `MODELS_DIR`, or set
+> `MODEL_FILE` to the file you want.
 
 ## Architecture
 

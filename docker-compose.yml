@@ -1,5 +1,6 @@
 # Full environment: Rust sampler + Python inference engine + Open WebUI.
-# Put a GGUF model in ./models/ and set MODEL_FILE (or rename it to model.gguf):
+# Put one GGUF model in ./models/ and run:   docker compose up --build
+# With several models, pick one by file name:
 #   MODEL_FILE=qwen2.5-0.5b-instruct-q4_k_m.gguf docker compose up --build
 services:
   sampler:
@@ -19,7 +20,8 @@ services:
       - sampler
     command:
       - --model
-      - /models/${MODEL_FILE:-model.gguf}
+      # MODEL_FILE unset -> "/models/"; the engine then picks the only .gguf in it
+      - /models/${MODEL_FILE:-}
       - --host
       - 0.0.0.0
       - --port
