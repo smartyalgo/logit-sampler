@@ -6,7 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from tcpip_gen.engine import GenerationResult
-from tcpip_gen.server import create_app
+from tcpip_gen.server import create_app, resolve_model_path
 
 
 class FakeEngine:
@@ -168,3 +168,27 @@ def test_ollama_ps(path):
     # /api/ps adds runtime-only fields on top of the /api/tags entry shape.
     assert "expires_at" in model
     assert "size_vram" in model
+
+
+# -- model path resolution ---------------------------------------------------
+
+
+def test_resolve_model_path_passes_files_through(tmp_path):
+    gguf = tmp_path / "m.gguf"
+    gguf.write_bytes(b"")
+    assert resolve_model_path(str(gguf)) == str(gguf)
+
+
+def test_resolve_model_path_picks_the_only_gguf_in_a_directory(tmp_path):
+    gguf = tmp_path / "SmolLM2.gguf"
+    gguf.write_bytes(b"")
+    (tmp_path / "README.md").write_text("not a model")
+    assert resolve_model_path(str(tmp_path)) == str(gguf)
+
+
+@pytest.mark.parametrize("names", [[], ["a.gguf", "b.gguf"]])
+def test_resolve_model_path_rejects_ambiguous_directory(tmp_path, names):
+    for name in names:
+        (tmp_path / name).write_bytes(b"")
+    with pytest.raises(SystemExit, match="exactly one"):
+        resolve_model_path(str(tmp_path))

@@ -19,6 +19,7 @@ Run with: ``python -m tcpip_gen.server --model <model.gguf>``.
 from __future__ import annotations
 
 import argparse
+import glob
 import os
 import time
 import uuid
@@ -255,7 +256,11 @@ def build_parser() -> argparse.ArgumentParser:
         prog="tcpip_gen.server",
         description="OpenAI-compatible HTTP server backed by the remote logit sampler.",
     )
-    parser.add_argument("--model", required=True, help="path to a .gguf model")
+    parser.add_argument(
+        "--model",
+        required=True,
+        help="path to a .gguf model, or a directory holding exactly one",
+    )
     parser.add_argument("--host", default="127.0.0.1", help="HTTP bind host")
     parser.add_argument("--port", type=int, default=8000, help="HTTP bind port")
     parser.add_argument(
@@ -276,6 +281,24 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
+def resolve_model_path(path: str) -> str:
+    """Return ``path``, or the single ``*.gguf`` inside it when it is a directory.
+
+    Lets ``docker compose up`` work without ``MODEL_FILE`` when the mounted
+    models directory holds exactly one model.
+    """
+    if not os.path.isdir(path):
+        return path
+    found = sorted(glob.glob(os.path.join(path, "*.gguf")))
+    if len(found) == 1:
+        return found[0]
+    names = ", ".join(os.path.basename(f) for f in found) or "none"
+    raise SystemExit(
+        f"--model {path}: expected exactly one .gguf, found {names} "
+        "(pass the file directly; with docker compose set MODEL_FILE)"
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
 
@@ -286,8 +309,9 @@ def main(argv: list[str] | None = None) -> int:
     from .engine import LlamaSamplerEngine
     from .llama_backend import LlamaModel
 
-    print(f"Loading model {args.model} ...", flush=True)
-    model = LlamaModel(args.model)
+    model_path = resolve_model_path(args.model)
+    print(f"Loading model {model_path} ...", flush=True)
+    model = LlamaModel(model_path)
     client = SamplerClient(args.sampler_host, args.sampler_port)
     client.connect()
     client.handshake(model.n_vocab, model.vocab_pieces())
@@ -295,7 +319,7 @@ def main(argv: list[str] | None = None) -> int:
         f"Connected to sampler at {args.sampler_host}:{args.sampler_port}", flush=True
     )
 
-    model_id = args.model_id or os.path.basename(args.model)
+    model_id = args.model_id or os.path.basename(model_path)
     engine = LlamaSamplerEngine(model, client, model_id)
     app = create_app(engine, default_max_tokens=args.max_tokens)
 
