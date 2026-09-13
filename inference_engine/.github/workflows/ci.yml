@@ -18,10 +18,10 @@ jobs:
       # tests run in an ephemeral env (--no-project) without building the native
       # wheel. LlamaModel is covered by the manual e2e run.
       - name: Ruff format check
-        run: uv run --no-project --with ruff ruff format --check .
+        run: uv run --no-project --with ruff==0.15.14 ruff format --check .
 
       - name: Ruff lint
-        run: uv run --no-project --with ruff ruff check .
+        run: uv run --no-project --with ruff==0.15.14 ruff check .
 
       - name: Pytest
         run: >-
