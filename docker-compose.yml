@@ -7,7 +7,7 @@ services:
     build: ./stateful_sampler
     # Sampling params live here (the wire protocol only carries logits, so
     # client-side temperature/top_p are ignored). Add flags after the address:
-    # command: ["0.0.0.0:5146", "--temperature", "0.8", "--top_k", "40"]
+    # command: ["0.0.0.0:5146", "--temperature", "0.8", "--top-k", "40"]
     command: ["0.0.0.0:5146"]
     environment:
       RUST_LOG: ${RUST_LOG:-info}
