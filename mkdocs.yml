@@ -1,0 +1,45 @@
+site_name: stateful-logit-sampler
+site_description: Split LLM inference from token sampling across a TCP socket.
+repo_url: https://github.com/smartyalgo/logit-sampler
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  features:
+    - navigation.top
+    - navigation.footer
+    - content.code.copy
+    - search.highlight
+
+# Left panel. Add a page here after you create it under docs/.
+nav:
+  - Overview: index.md
+  - Getting started:
+      - Docker Compose: getting-started/docker-compose.md
+      - Manual quick start: getting-started/manual.md
+      - Open WebUI: getting-started/open-webui.md
+  - Architecture: architecture.md
+  - Wire protocol: wire-protocol.md
+  - Components:
+      - Inference engine: components/inference-engine.md
+      - Stateful sampler: components/stateful-sampler.md
+      - Prompt eval: components/prompt-eval.md
+  - Development: development.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+# Broken cross-page links and anchors fail `mkdocs build --strict`.
+validation:
+  links:
+    absolute_links: warn
+    unrecognized_links: warn
+    anchors: warn
