@@ -43,7 +43,9 @@ Read this before you change anything in this repository.
 
 ### Adding or changing a page
 
-1. Write `docs/<section>/<name>.md`. Start with one `# Title`.
+1. Write `docs/<section>/<name>.md`. Start with one `# Title`. How-to
+   guides go in `docs/guides/` under a `Guides` nav section. Create the
+   section on first use.
 2. Add it to `nav` in `mkdocs.yml`.
 3. Link it from at least one related page. Add a row to the README docs
    table only for a new top-level topic.
