@@ -24,8 +24,9 @@ Read this before you change anything in this repository.
   `[ignored](../components/inference-engine.md#sampling-parameters-are-ignored)`.
   Link repo files with a GitHub URL. Mermaid fences render as diagrams.
   Callouts: `!!! note "Title"` with the body indented four spaces.
-- The full recipe and the templates are in the `mkdocs-docs` skill under
-  `.claude/skills/mkdocs-docs/`.
+- The full recipe and the templates are in the `mkdocs-docs` plugin from the
+  `smarty-agents` marketplace (`/plugin install mkdocs-docs@smarty-agents`).
+  This file stands on its own without it.
 
 ### Where topics live
 
