@@ -53,3 +53,18 @@ uv run mkdocs build --strict         # one-shot build into ./site; fails on brok
 ```
 
 To add a page, create `docs/<name>.md` and add it to `nav` in `mkdocs.yml`.
+
+## Agent instructions
+
+`AGENTS.md` at the repo root tells a coding agent where the docs live, how to
+add a page, and that the strict build must pass. `CLAUDE.md` imports it, so
+Claude Code reads the same file. The `mkdocs-docs` plugin from the
+`smarty-agents` marketplace holds the full recipe and the templates for
+`mkdocs.yml` and the CI workflow:
+
+```
+/plugin marketplace add smartyalgo/smarty_agents
+/plugin install mkdocs-docs@smarty-agents
+```
+
+`AGENTS.md` is complete without the plugin.

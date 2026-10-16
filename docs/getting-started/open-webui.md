@@ -70,7 +70,7 @@ If you skip the `OPENAI_API_BASE_URL` env var, add the connection from the web U
     Sampling controls in Open WebUI (temperature, top-p, …) are **ignored**. The
     [wire protocol](../wire-protocol.md) only carries logits, so sampling is
     governed by the Rust sampler's flags. Adjust them via
-    `cargo run -- --temperature … --top_k …` on the sampler.
+    `cargo run -- --temperature … --top-k …` on the sampler.
     Only one chat completion runs at a time (see the
     [single-instance assumption](../components/stateful-sampler.md#design-assumptions)),
     so avoid concurrent generations across multiple Open WebUI chats.

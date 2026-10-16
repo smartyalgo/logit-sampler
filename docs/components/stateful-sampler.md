@@ -24,7 +24,7 @@ cargo test
 cargo run                      # listens on 0.0.0.0:5146 with default sampling params
 
 # Override sampling parameters (defaults: temperature 1.0, top_k 1, top_p 1.0, min_p 0.05):
-cargo run -- 0.0.0.0:5146 --temperature 0.8 --top_k 40 --top_p 0.95 --min_p 0.05
+cargo run -- 0.0.0.0:5146 --temperature 0.8 --top-k 40 --top-p 0.95 --min-p 0.05
 ```
 
 ## How to run in Docker
