@@ -30,11 +30,33 @@ uv run pytest
 
 ## Continuous integration
 
-The subprojects have GitHub Actions workflows
-(`stateful_sampler/.github/workflows/rust.yml`,
-`inference_engine/.github/workflows/ci.yml`). The docs site is built with
-`--strict` by `.github/workflows/docs.yml`, so a broken cross-page link or
-anchor fails the build.
+GitHub runs workflows only from the repo-root `.github/workflows/`.
+`tests.yml` runs the lint and unit tests of all three components, with a
+coverage report for the Python suites. `docs.yml` builds the docs site with
+`--strict`, so a broken cross-page link or anchor fails the build.
+
+## Test coverage
+
+```bash
+# Rust (one-time: cargo install cargo-llvm-cov)
+cd stateful_sampler && cargo llvm-cov
+
+# Python inference engine (no llama-cpp-python needed)
+cd inference_engine && uv run --no-project --with pytest --with pytest-cov \
+  --with numpy --with fastapi --with sse-starlette --with httpx \
+  pytest --cov=tcpip_gen --cov-report=term-missing
+
+# Prompt eval
+cd prompt_eval && uv run --with pytest-cov pytest --cov=. --cov-report=term-missing
+```
+
+Line coverage on 2026-10-24 (SMA-415):
+
+| Component | Line coverage | Not covered |
+|-----------|---------------|-------------|
+| `stateful_sampler` | 52% (was 34%; the suite did not compile before) | `main.rs`, the TCP connection loop in `sampler.rs` |
+| `inference_engine` | 55% | `__main__.py`, `llama_backend.py` (need a GGUF model), the streaming paths in `engine.py` and `server.py` |
+| `prompt_eval` | 93% (source files 82%–92%) | `main()` entry points, network fetch |
 
 ## Documentation
 

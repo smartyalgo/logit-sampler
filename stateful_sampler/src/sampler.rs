@@ -496,6 +496,39 @@ mod tests {
         assert_eq!(sampler.debug_token_from_index(99), None);
     }
 
+    #[test]
+    fn test_sample_logit_top_k_one_picks_largest() {
+        let sampler = helper_sampler_with_vocab(vec![]);
+        assert_eq!(sampler.sample_logit(vec![0.1, 0.7, 0.2]), 1);
+    }
+
+    #[test]
+    fn test_header_from_bytes_reads_token_length() {
+        let mut bytes = b"HANDSHAKE".to_vec();
+        bytes.extend_from_slice(&256i32.to_le_bytes());
+        assert_eq!(HandshakeParams::header_from_bytes(&bytes).unwrap(), 256);
+    }
+
+    #[test]
+    fn test_header_from_bytes_rejects_short_input() {
+        assert!(HandshakeParams::header_from_bytes(b"HANDSHAKE").is_err());
+    }
+
+    #[test]
+    fn test_header_from_bytes_rejects_bad_magic() {
+        assert!(HandshakeParams::header_from_bytes(b"HELLOWRLD\x01\x00\x00\x00").is_err());
+    }
+
+    #[test]
+    fn test_model_vocab_from_bytes_splits_on_nul() {
+        // Leading NUL becomes the "NUL" token once; invalid UTF-8 becomes "".
+        let bytes = b"\x00\x00ab\x00\xff\x00c\x00".to_vec();
+        assert_eq!(
+            HandshakeParams::model_vocab_from_bytes(bytes),
+            vec!["NUL", "ab", "", "c"]
+        );
+    }
+
     // #[test]
     fn test_tcp_handshake() {
         // Attempt to connect to localhost on a specific port

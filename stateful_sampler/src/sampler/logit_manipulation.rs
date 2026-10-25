@@ -149,8 +149,9 @@ pub fn softmax(logits: Vec<f32>) -> Vec<f32> {
     softmax_array
 }
 
+#[cfg(test)]
 mod tests {
-    // use super::*;
+    use super::*;
 
     #[test]
     fn test_equality() {
@@ -2089,6 +2090,13 @@ mod tests {
         assert!(softmax_logits[3] < softmax_logits[4]);
         let sum: f32 = softmax_logits.iter().sum();
         assert_eq!(sum, 1.0);
+    }
+
+    #[test]
+    fn test_min_p_logits() {
+        let mut logits = vec![0.5, 0.1, 0.3, 0.04];
+        min_p_logits(&mut logits, 0.5, 0.5);
+        assert_eq!(logits, vec![0.5, 0.0, 0.3, 0.0]);
     }
 
     #[test]
