@@ -37,3 +37,6 @@ __pycache__/
 
 # MkDocs build output (docs/ is the source, see mkdocs.yml)
 site/
+
+# coverage.py data
+.coverage
